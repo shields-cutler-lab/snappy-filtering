@@ -10,11 +10,11 @@ def convert_txt_to_csv(data):
 
 
 def import_data(data):
-    return pd.read_csv(data)
+    return pd.read_csv(data, delimiter="\t", header=0, index_col=0)
 
 
 def csv_to_dict(data):
-    reader = csv.DictReader(open(data))
+    reader = csv.DictReader(open(data), delimiter='\t')
     dict_list = []
     for line in reader:
         dict_list.append(line)
@@ -22,10 +22,11 @@ def csv_to_dict(data):
 
 
 def csv_to_array(data):
-    reader = csv.reader(open(data))
+    reader = csv.reader(open(data), delimiter='\t')
     array = []
     for line in reader:
         array.append(line)
+    print(array)
     return array
 
 

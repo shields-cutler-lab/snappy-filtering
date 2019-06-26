@@ -10,7 +10,7 @@ def convert_txt_to_csv(data):
 
 
 def import_data(data):
-    return pd.read_csv(data, delimiter="\t", header=0, index_col=0)
+    return pd.read_csv(data, delimiter="\t")
 
 
 def csv_to_dict(data):
@@ -26,7 +26,6 @@ def csv_to_array(data):
     array = []
     for line in reader:
         array.append(line)
-    print(array)
     return array
 
 
@@ -68,6 +67,7 @@ def otu_processor(data):
     x = int(input("Enter an integer to filter OTUs that have low total counts across the dataset: "))
     y = float(input("Enter a float to filter OTUs that are present in onlt a small proportion of the samples: "))
     df = import_data(data)
+    print(csv_to_array(data))
     for i in range(1, len(csv_to_array(data))):
         sum_of_row = 0
         num_of_non0 = 0
@@ -77,7 +77,7 @@ def otu_processor(data):
                 num_of_non0 = num_of_non0 + 1
         percentage = (num_of_non0 / original_num_of_samples(data)) * 100
         if sum_of_row <= x or percentage < y:
-            df = df.drop(i - 1)
+            df = df.drop(i-1)
     return df
 
 
@@ -114,7 +114,6 @@ def sample_processor(df):
 
 def processor(data):
     print("The sum of all counts in the entire table is: %d" % sum_of_all_counts(data))
-#     print(sum_of_all_counts(data))
     df_after_otu_filter = otu_processor(data)
     df_after_both_filter = sample_processor(df_after_otu_filter)
 
@@ -125,7 +124,7 @@ def processor(data):
     print("The final number of OTUs is: " + str(final_OTUs))
     print("The final number of samples is: " + str(final_samples))
     output_path = input("Enter a path to save the file: ")
-    df_after_both_filter.to_csv(output_path)
+    df_after_both_filter.to_csv(output_path, sep=' ')
 
 
 if __name__ == '__main__':

@@ -124,8 +124,7 @@ def processor():
 
 def delete_column(metadata, list):
     df = import_data(metadata)
-    for column in list:
-        df = df.drop([column], axis=1)
+    df = df.drop(list)
     return df
 
 

@@ -3,14 +3,8 @@ import csv
 import pandas as pd
 
 
-def convert_txt_to_csv(data):
-    df = pd.read_fwf(data)
-    df.to_csv(data)
-    return data
-
-
 def import_data(data):
-    return pd.read_csv(data, delimiter="\t", header=0, index_col=0)
+    return pd.read_csv(data, delimiter="\t")
 
 
 def csv_to_dict(data):
@@ -26,7 +20,6 @@ def csv_to_array(data):
     array = []
     for line in reader:
         array.append(line)
-    print(array)
     return array
 
 
@@ -68,6 +61,7 @@ def otu_processor(data):
     x = int(input("Enter an integer to filter OTUs that have low total counts across the dataset: "))
     y = float(input("Enter a float to filter OTUs that are present in onlt a small proportion of the samples: "))
     df = import_data(data)
+    print(csv_to_array(data))
     for i in range(1, len(csv_to_array(data))):
         sum_of_row = 0
         num_of_non0 = 0
@@ -77,11 +71,11 @@ def otu_processor(data):
                 num_of_non0 = num_of_non0 + 1
         percentage = (num_of_non0 / original_num_of_samples(data)) * 100
         if sum_of_row <= x or percentage < y:
-            df = df.drop(i - 1)
+            df = df.drop(i-1)
     return df
 
 
-def sample_processor(df):
+def sample_processor_without_metadata(df):
     sum_column = df.sum(axis=0)
     index_list = list(sum_column.index.values)
     value_list = list(sum_column.values)
@@ -102,30 +96,53 @@ def sample_processor(df):
     print(new_series)
     threshold = int(input("Enter an integer for a threshold to filter out the samples:"))
     df_list = list(df.values)
+    delete_column_name = list()
     for h in range(1, len(df_list[1])):
         sum_of_each_column = 0
         for i in range(1, len(df_list)):
             sum_of_each_column = sum_of_each_column + int(df_list[i][h])
         if sum_of_each_column < threshold:
             column_name = csv_to_array(data)[0][h]
+            delete_column_name.append(column_name)
             df = df.drop([column_name], axis=1)
-    return df
+    return df, delete_column_name
 
 
-def processor(data):
-    print("The sum of all counts in the entire table is: %d" % sum_of_all_counts(data))
-#     print(sum_of_all_counts(data))
+def processor():
+    print("The sum of all counts in the entire OTU table is: %d" % sum_of_all_counts(data))
     df_after_otu_filter = otu_processor(data)
-    df_after_both_filter = sample_processor(df_after_otu_filter)
-
+    df_after_both_filter, delete_column_name = sample_processor_without_metadata(df_after_otu_filter)
     final_OTUs = df_after_both_filter.shape[0]
-    final_samples = df_after_both_filter.shape[1] -1
+    final_samples = df_after_both_filter.shape[1] - 1
     print("The original number of OTUs is : " + str(original_num_of_otus(data)))
     print("The original number of samples is : " + str(original_num_of_samples(data)))
     print("The final number of OTUs is: " + str(final_OTUs))
     print("The final number of samples is: " + str(final_samples))
-    output_path = input("Enter a path to save the file: ")
-    df_after_both_filter.to_csv(output_path)
+    output_path = input("Enter a path to save the OTU table: ")
+    df_after_both_filter.to_csv(output_path, sep=' ')
+
+
+def delete_column(metadata, list):
+    df = import_data(metadata)
+    df = df.drop(list)
+    return df
+
+
+def processor_with_metadata():
+    print("The sum of all counts in the entire OTU table is: %d" % sum_of_all_counts(data))
+    df_after_otu_filter = otu_processor(data)
+    df_after_both_filter, delete_column_name = sample_processor_without_metadata(df_after_otu_filter)
+    df_metadata_after_sample_filter = delete_column(metadata, delete_column_name)
+    final_OTUs = df_after_both_filter.shape[0]
+    final_samples = df_after_both_filter.shape[1] - 1
+    print("The original number of OTUs is : " + str(original_num_of_otus(data)))
+    print("The original number of samples is : " + str(original_num_of_samples(data)))
+    print("The final number of OTUs is: " + str(final_OTUs))
+    print("The final number of samples is: " + str(final_samples))
+    output_path1 = input("Enter a path to save the OTU table: ")
+    df_after_both_filter.to_csv(output_path1, sep=' ')
+    output_path2 = input("Enter a path to save the metadata file: ")
+    df_metadata_after_sample_filter.to_csv(output_path2, sep=' ')
 
 
 if __name__ == '__main__':
@@ -133,5 +150,9 @@ if __name__ == '__main__':
         print('Must provide original input table')
         sys.exit()
     data = sys.argv[1]
-    processor(data)
+    if len(sys.argv) == 3:
+        metadata = sys.argv[2]
+        processor_with_metadata()
+    else:
+        processor()
 

@@ -75,7 +75,7 @@ def otu_processor(data):
     return df
 
 
-def sample_processor_without_metadata(df):
+def sample_processor(df):
     sum_column = df.sum(axis=0)
     index_list = list(sum_column.index.values)
     value_list = list(sum_column.values)
@@ -96,22 +96,22 @@ def sample_processor_without_metadata(df):
     print(new_series)
     threshold = int(input("Enter an integer for a threshold to filter out the samples:"))
     df_list = list(df.values)
-    delete_column_name = list()
+    delete_column_index = list()
     for h in range(1, len(df_list[1])):
         sum_of_each_column = 0
         for i in range(1, len(df_list)):
             sum_of_each_column = sum_of_each_column + int(df_list[i][h])
         if sum_of_each_column < threshold:
             column_name = csv_to_array(data)[0][h]
-            delete_column_name.append(column_name)
+            delete_column_index.append(h-1)
             df = df.drop([column_name], axis=1)
-    return df, delete_column_name
+    return df, delete_column_index
 
 
 def processor():
     print("The sum of all counts in the entire OTU table is: %d" % sum_of_all_counts(data))
     df_after_otu_filter = otu_processor(data)
-    df_after_both_filter, delete_column_name = sample_processor_without_metadata(df_after_otu_filter)
+    df_after_both_filter, delete_column_name = sample_processor(df_after_otu_filter)
     final_OTUs = df_after_both_filter.shape[0]
     final_samples = df_after_both_filter.shape[1] - 1
     print("The original number of OTUs is : " + str(original_num_of_otus(data)))
@@ -124,15 +124,16 @@ def processor():
 
 def delete_column(metadata, list):
     df = import_data(metadata)
-    df = df.drop(list)
+    df = df.drop(list, axis=0)
+    print(df)
     return df
 
 
 def processor_with_metadata():
     print("The sum of all counts in the entire OTU table is: %d" % sum_of_all_counts(data))
     df_after_otu_filter = otu_processor(data)
-    df_after_both_filter, delete_column_name = sample_processor_without_metadata(df_after_otu_filter)
-    df_metadata_after_sample_filter = delete_column(metadata, delete_column_name)
+    df_after_both_filter, delete_column_index = sample_processor(df_after_otu_filter)
+    df_metadata_after_sample_filter = delete_column(metadata, delete_column_index)
     final_OTUs = df_after_both_filter.shape[0]
     final_samples = df_after_both_filter.shape[1] - 1
     print("The original number of OTUs is : " + str(original_num_of_otus(data)))

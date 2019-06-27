@@ -40,13 +40,10 @@ def find_smallest(list):
 
 
 def find_smallest_index(list):
-    smallest = list[1]
-    index = 1
-    for i in range(1, len(list)):
-        if list[i] < smallest:
-            smallest = list[i]
-            index = i
-    return index
+    list2 = list.copy()
+    if list2[0] == 'Total Counts':
+        list2.remove('Total Counts')
+    return list2.index(min(list2))
 
 
 def sum_of_all_counts(data):

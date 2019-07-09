@@ -31,21 +31,6 @@ def original_num_of_samples(data):
     return len(csv_to_dict(data)[0]) - 1
 
 
-def find_smallest(list):
-    list2 = list.copy()
-    if list2[0] == 'Total Counts':
-        list2.remove('Total Counts')
-    list2.sort()
-    return list2[0]
-
-
-def find_smallest_index(list):
-    list2 = list.copy()
-    if list2[0] == 'Total Counts':
-        list2.remove('Total Counts')
-    return list2.index(min(list2))
-
-
 def sum_of_all_counts(data):
     df = import_data(data)
     df = df.drop([df.columns[0]], axis=1)
@@ -93,7 +78,7 @@ def delete_column(metadata, filter_list):
     return metadf
 
 
-def processor_with_metadata():
+def processor_with_metadata(metadata):
     print("The sum of all counts in the entire OTU table is: %d" % sum_of_all_counts(data))
     df_after_otu_filter = otu_processor(data)
     df_after_both_filter = sample_processor(df_after_otu_filter)
@@ -117,7 +102,7 @@ if __name__ == '__main__':
     print(data)
     if len(sys.argv) == 3:
         metadata = sys.argv[2]
-        processor_with_metadata()
+        processor_with_metadata(metadata)
     else:
         processor()
 

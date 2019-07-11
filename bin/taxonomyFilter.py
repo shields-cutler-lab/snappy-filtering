@@ -85,6 +85,8 @@ def processor_with_metadata(metadata):
     df_metadata_after_sample_filter = delete_column(metadata, list(df_after_both_filter.columns))
     final_OTUs = df_after_both_filter.shape[0]
     final_samples = df_after_both_filter.shape[1]
+    print(df_metadata_after_sample_filter)
+    print("The original number of OTUs is : " + str(original_num_of_otus(data)))
     print("The original number of samples is : " + str(original_num_of_samples(data)))
     print("The final number of OTUs is: " + str(final_OTUs))
     print("The final number of samples is: " + str(final_samples))
